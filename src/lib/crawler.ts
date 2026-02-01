@@ -102,9 +102,9 @@ export async function processMonitoredUrl(urlId: string): Promise<boolean> {
     statusCode: result.statusCode,
   }).returning();
 
-  // Check if content changed
-  const hasChanged = !!(monitoredUrl.lastContentHash && 
-                     monitoredUrl.lastContentHash !== result.contentHash);
+  // Check if content changed (explicit boolean to satisfy TypeScript)
+  const hasChanged: boolean = monitoredUrl.lastContentHash !== null && 
+                              monitoredUrl.lastContentHash !== result.contentHash;
 
   if (hasChanged) {
     // Find previous snapshot
