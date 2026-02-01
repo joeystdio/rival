@@ -1,5 +1,8 @@
 import { redirect } from 'next/navigation';
 import { getUser, getLoginUrl } from '@/lib/auth';
+import { db } from '@/lib/db';
+import { users } from '@/lib/schema';
+import { eq } from 'drizzle-orm';
 import Sidebar from '@/components/Sidebar';
 import { 
   Clock, 
@@ -18,6 +21,11 @@ export default async function TimelinePage() {
     redirect(getLoginUrl('/timeline'));
   }
 
+  // Get user role for sidebar
+  const dbUser = await db.query.users.findFirst({
+    where: eq(users.email, user.email)
+  });
+
   // Mock data
   const changes: any[] = [];
 
@@ -30,7 +38,7 @@ export default async function TimelinePage() {
 
   return (
     <div className="min-h-screen bg-background">
-      <Sidebar />
+      <Sidebar userRole={dbUser?.role} />
       
       <main className="ml-64 min-h-screen">
         {/* Header */}

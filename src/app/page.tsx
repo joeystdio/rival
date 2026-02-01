@@ -31,7 +31,7 @@ export default async function Dashboard() {
 
   return (
     <div className="min-h-screen bg-background">
-      <Sidebar />
+      <Sidebar userRole={user.role} />
       
       <main className="ml-64 min-h-screen">
         {/* Header */}

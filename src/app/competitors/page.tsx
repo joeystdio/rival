@@ -1,5 +1,8 @@
 import { redirect } from 'next/navigation';
 import { getUser, getLoginUrl } from '@/lib/auth';
+import { db } from '@/lib/db';
+import { users } from '@/lib/schema';
+import { eq } from 'drizzle-orm';
 import Sidebar from '@/components/Sidebar';
 import Link from 'next/link';
 import { 
@@ -20,12 +23,17 @@ export default async function CompetitorsPage() {
     redirect(getLoginUrl('/competitors'));
   }
 
+  // Get user role for sidebar
+  const dbUser = await db.query.users.findFirst({
+    where: eq(users.email, user.email)
+  });
+
   // Mock data
   const competitors: any[] = [];
 
   return (
     <div className="min-h-screen bg-background">
-      <Sidebar />
+      <Sidebar userRole={dbUser?.role} />
       
       <main className="ml-64 min-h-screen">
         {/* Header */}

@@ -9,9 +9,14 @@ import {
   Settings, 
   Plus,
   Target,
-  ArrowLeft
+  ArrowLeft,
+  Shield
 } from 'lucide-react';
 import clsx from 'clsx';
+
+interface SidebarProps {
+  userRole?: string;
+}
 
 const navItems = [
   { href: '/', label: 'Dashboard', icon: LayoutDashboard },
@@ -20,8 +25,9 @@ const navItems = [
   { href: '/settings', label: 'Settings', icon: Settings },
 ];
 
-export default function Sidebar() {
+export default function Sidebar({ userRole }: SidebarProps) {
   const pathname = usePathname();
+  const isSuperAdmin = userRole === 'super_admin';
 
   return (
     <aside className="w-64 h-screen bg-surface border-r border-border flex flex-col fixed left-0 top-0">
@@ -57,6 +63,24 @@ export default function Sidebar() {
               </li>
             );
           })}
+
+          {/* Admin Link - only for super admins */}
+          {isSuperAdmin && (
+            <li className="pt-4 mt-4 border-t border-border">
+              <Link
+                href="/admin"
+                className={clsx(
+                  'flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium transition-all duration-200',
+                  pathname.startsWith('/admin')
+                    ? 'bg-red-500/10 text-red-400'
+                    : 'text-zinc-400 hover:text-red-400 hover:bg-red-500/10'
+                )}
+              >
+                <Shield className="w-5 h-5" />
+                Admin Panel
+              </Link>
+            </li>
+          )}
         </ul>
 
         {/* Add Competitor Button */}
