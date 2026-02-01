@@ -1,0 +1,39 @@
+services:
+  rival:
+    build: .
+    container_name: rival-app
+    restart: unless-stopped
+    environment:
+      - DATABASE_URL=postgresql://postgres:postgres@rival-db:5432/rival
+      - NODE_ENV=production
+    networks:
+      - n8n-network
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.rival.rule=Host(`rival.jdms.nl`)"
+      - "traefik.http.routers.rival.entrypoints=websecure"
+      - "traefik.http.routers.rival.tls.certresolver=letsencrypt"
+      - "traefik.http.services.rival.loadbalancer.server.port=3000"
+    depends_on:
+      - rival-db
+
+  rival-db:
+    image: postgres:15-alpine
+    container_name: rival-db
+    restart: unless-stopped
+    environment:
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=postgres
+      - POSTGRES_DB=rival
+    volumes:
+      - rival-db-data:/var/lib/postgresql/data
+    networks:
+      - n8n-network
+
+networks:
+  n8n-network:
+    external: true
+    name: n8n-setup_n8n-network
+
+volumes:
+  rival-db-data:
