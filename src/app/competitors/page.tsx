@@ -1,8 +1,8 @@
 import { redirect } from 'next/navigation';
 import { getUser, getLoginUrl } from '@/lib/auth';
 import { db } from '@/lib/db';
-import { users } from '@/lib/schema';
-import { eq } from 'drizzle-orm';
+import { users, competitors as competitorsTable, monitoredUrls } from '@/lib/schema';
+import { eq, desc, count } from 'drizzle-orm';
 import Sidebar from '@/components/Sidebar';
 import Link from 'next/link';
 import { 
@@ -16,6 +16,8 @@ import {
   Users as UsersIcon
 } from 'lucide-react';
 
+export const dynamic = 'force-dynamic';
+
 export default async function CompetitorsPage() {
   const user = await getUser();
   
@@ -23,13 +25,35 @@ export default async function CompetitorsPage() {
     redirect(getLoginUrl('/competitors'));
   }
 
-  // Get user role for sidebar
+  // Get user from DB
   const dbUser = await db.query.users.findFirst({
     where: eq(users.email, user.email)
   });
 
-  // Mock data
-  const competitors: any[] = [];
+  // Fetch competitors from database
+  let competitors: any[] = [];
+  
+  if (dbUser) {
+    const userCompetitors = await db.select()
+      .from(competitorsTable)
+      .where(eq(competitorsTable.userId, dbUser.id))
+      .orderBy(desc(competitorsTable.createdAt));
+    
+    // Get URL counts for each competitor
+    for (const comp of userCompetitors) {
+      const urls = await db.select()
+        .from(monitoredUrls)
+        .where(eq(monitoredUrls.competitorId, comp.id));
+      
+      competitors.push({
+        ...comp,
+        urlCount: urls.length,
+        changeCount: 0,
+        lastChecked: 'Never',
+        status: 'active'
+      });
+    }
+  }
 
   return (
     <div className="min-h-screen bg-background">
